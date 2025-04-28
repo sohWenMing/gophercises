@@ -17,9 +17,7 @@ var qs *quizState = &quizState{
 
 func main() {
 
-	time.AfterFunc(10*time.Second, endQuiz)
-
-	fileFlag := defineFlags()
+	fileFlag, durationFlag := defineFlags()
 	flag.Parse()
 	fmt.Printf("using file: %s\n", *fileFlag)
 
@@ -35,12 +33,27 @@ func main() {
 	//parse information out from csv file
 
 	scanner := bufio.NewScanner(os.Stdin)
+	quizDuration := *durationFlag
+
+	printDurAndWaitToStart(scanner, quizDuration)
+	time.AfterFunc(10*time.Second, endQuiz)
 	for _, row := range data {
 		qna := mapQna(row[0], row[1])
 		runQuestion(scanner, qna, qs)
 		qs.printCurrState()
 	}
 	defer file.Close()
+}
+
+func printDurAndWaitToStart(scanner *bufio.Scanner, quizDuration int) {
+	prompt := fmt.Sprintf("You have %d seconds to anwser as many questions as possible ... hit ENTER to start the quiz", quizDuration)
+	fmt.Println(prompt)
+	for {
+		if scanner.Scan() {
+			fmt.Println("Starting quiz!")
+			return
+		}
+	}
 }
 
 func endQuiz() {
@@ -123,13 +136,16 @@ func logFatalIfErr(err error) {
 	}
 }
 
-func defineFlags() (filename *string) {
+func defineFlags() (filename *string, secDuration *int) {
 	const (
-		defaultFile = "problems.csv"
-		usage       = "the filename where the quiz details are"
+		defaultFile     = "problems.csv"
+		fileUsage       = "the filename where the quiz details are"
+		defaultDuration = 30
+		durationUsage   = "the duration of the quiz in seconds"
 	)
-	fileFlag := flag.String("quiz_file", defaultFile, usage)
-	return fileFlag
+	fileFlag := flag.String("quiz_file", defaultFile, fileUsage)
+	durationFlag := flag.Int("quiz_duration", defaultDuration, durationUsage)
+	return fileFlag, durationFlag
 }
 
 func getData(file *os.File) (data [][]string, err error) {
