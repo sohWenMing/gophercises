@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -90,13 +91,6 @@ func runQuestion(scanner *bufio.Scanner, qna *qna, qs *quizState) {
 	}
 }
 
-func initQState() *quizState {
-	state := quizState{
-		0, 0,
-	}
-	return &state
-}
-
 func (qs *quizState) incQAttempted() {
 	qs.questionAttempted++
 }
@@ -160,5 +154,8 @@ func getData(file *os.File) (data [][]string, err error) {
 	if len(data) == 0 {
 		return nil, errors.New("no data was returned from reading file")
 	}
+	rand.Shuffle(len(data), func(i int, j int) {
+		data[i], data[j] = data[j], data[i]
+	})
 	return data, nil
 }
