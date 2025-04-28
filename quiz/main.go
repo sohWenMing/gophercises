@@ -8,11 +8,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
+
+var qs *quizState = &quizState{
+	0, 0,
+}
 
 func main() {
 
-	qs := initQState()
+	time.AfterFunc(10*time.Second, endQuiz)
+
 	fileFlag := defineFlags()
 	flag.Parse()
 	fmt.Printf("using file: %s\n", *fileFlag)
@@ -35,6 +41,12 @@ func main() {
 		qs.printCurrState()
 	}
 	defer file.Close()
+}
+
+func endQuiz() {
+	fmt.Println("quiz ended")
+	qs.printCurrState()
+	os.Exit(0)
 }
 
 type qna struct {
