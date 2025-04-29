@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 // MapHandler will return an http.HandlerFunc (which also
@@ -64,4 +66,18 @@ func searchUrls(pathsToUrls map[string]string, r *http.Request) (foundUrl string
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	// TODO: Implement this...
 	return nil, nil
+}
+
+func ParseYAML(data []byte) (parsed []*PathToUrl, err error) {
+	parsedData := []PathToUrl{}
+	err = yaml.Unmarshal(data, &parsedData)
+	if err != nil {
+		return nil, err
+	}
+	return parsed, nil
+}
+
+type PathToUrl struct {
+	Path string `yaml:"path"`
+	URL  string `yaml:"url"`
 }
